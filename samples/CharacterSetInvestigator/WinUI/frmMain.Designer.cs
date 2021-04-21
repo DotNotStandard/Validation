@@ -38,6 +38,10 @@ namespace CharacterSetInvestigator.WinUI
 			this.lblCategoryOfInterest = new System.Windows.Forms.Label();
 			this.btnCopyToClipboard = new System.Windows.Forms.Button();
 			this.txtResults = new System.Windows.Forms.TextBox();
+			this.lblRestrictSets = new System.Windows.Forms.Label();
+			this.chkRestrict = new System.Windows.Forms.CheckBox();
+			this.lblToThoseContaining = new System.Windows.Forms.Label();
+			this.txtSetNameMatch = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
 			// 
 			// blMainHeading
@@ -66,7 +70,7 @@ namespace CharacterSetInvestigator.WinUI
 			// 
 			// btnTest
 			// 
-			this.btnTest.Location = new System.Drawing.Point(99, 178);
+			this.btnTest.Location = new System.Drawing.Point(99, 201);
 			this.btnTest.Name = "btnTest";
 			this.btnTest.Size = new System.Drawing.Size(94, 29);
 			this.btnTest.TabIndex = 2;
@@ -103,15 +107,15 @@ namespace CharacterSetInvestigator.WinUI
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.ddlCategory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.ddlCategory.FormattingEnabled = true;
-			this.ddlCategory.Location = new System.Drawing.Point(298, 117);
+			this.ddlCategory.Location = new System.Drawing.Point(226, 115);
 			this.ddlCategory.Name = "ddlCategory";
-			this.ddlCategory.Size = new System.Drawing.Size(627, 28);
+			this.ddlCategory.Size = new System.Drawing.Size(768, 28);
 			this.ddlCategory.TabIndex = 5;
 			// 
 			// lblCategoryOfInterest
 			// 
 			this.lblCategoryOfInterest.AutoSize = true;
-			this.lblCategoryOfInterest.Location = new System.Drawing.Point(99, 120);
+			this.lblCategoryOfInterest.Location = new System.Drawing.Point(58, 118);
 			this.lblCategoryOfInterest.Name = "lblCategoryOfInterest";
 			this.lblCategoryOfInterest.Size = new System.Drawing.Size(140, 20);
 			this.lblCategoryOfInterest.TabIndex = 6;
@@ -141,11 +145,53 @@ namespace CharacterSetInvestigator.WinUI
 			this.txtResults.TabIndex = 8;
 			this.txtResults.Visible = false;
 			// 
+			// lblRestrictSets
+			// 
+			this.lblRestrictSets.AutoSize = true;
+			this.lblRestrictSets.Location = new System.Drawing.Point(58, 148);
+			this.lblRestrictSets.Name = "lblRestrictSets";
+			this.lblRestrictSets.Size = new System.Drawing.Size(87, 20);
+			this.lblRestrictSets.TabIndex = 9;
+			this.lblRestrictSets.Text = "Restrict sets";
+			// 
+			// chkRestrict
+			// 
+			this.chkRestrict.AutoSize = true;
+			this.chkRestrict.Checked = true;
+			this.chkRestrict.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkRestrict.Location = new System.Drawing.Point(226, 151);
+			this.chkRestrict.Name = "chkRestrict";
+			this.chkRestrict.Size = new System.Drawing.Size(18, 17);
+			this.chkRestrict.TabIndex = 10;
+			this.chkRestrict.UseVisualStyleBackColor = true;
+			// 
+			// lblToThoseContaining
+			// 
+			this.lblToThoseContaining.AutoSize = true;
+			this.lblToThoseContaining.Location = new System.Drawing.Point(250, 148);
+			this.lblToThoseContaining.Name = "lblToThoseContaining";
+			this.lblToThoseContaining.Size = new System.Drawing.Size(272, 20);
+			this.lblToThoseContaining.TabIndex = 11;
+			this.lblToThoseContaining.Text = "to those whose name contains the word";
+			// 
+			// txtSetNameMatch
+			// 
+			this.txtSetNameMatch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.txtSetNameMatch.Location = new System.Drawing.Point(551, 145);
+			this.txtSetNameMatch.Name = "txtSetNameMatch";
+			this.txtSetNameMatch.Size = new System.Drawing.Size(443, 27);
+			this.txtSetNameMatch.TabIndex = 12;
+			this.txtSetNameMatch.Text = "Latin";
+			// 
 			// frmMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1061, 633);
+			this.Controls.Add(this.txtSetNameMatch);
+			this.Controls.Add(this.lblToThoseContaining);
+			this.Controls.Add(this.chkRestrict);
+			this.Controls.Add(this.lblRestrictSets);
 			this.Controls.Add(this.txtResults);
 			this.Controls.Add(this.btnCopyToClipboard);
 			this.Controls.Add(this.lblCategoryOfInterest);
@@ -175,6 +221,10 @@ namespace CharacterSetInvestigator.WinUI
 		private System.Windows.Forms.Label lblCategoryOfInterest;
 		private System.Windows.Forms.Button btnCopyToClipboard;
 		private System.Windows.Forms.TextBox txtResults;
+		private System.Windows.Forms.Label lblRestrictSets;
+		private System.Windows.Forms.CheckBox chkRestrict;
+		private System.Windows.Forms.Label lblToThoseContaining;
+		private System.Windows.Forms.TextBox txtSetNameMatch;
 	}
 }
 
