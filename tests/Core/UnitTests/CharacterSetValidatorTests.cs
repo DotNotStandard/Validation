@@ -92,7 +92,7 @@ namespace DotNotStandard.Validation.UnitTests
 
 			// Arrange
 			string testValue = "-1";
-			string characterSetName = BuiltInRules.CharacterSet.Integer;
+			string characterSetName = BuiltInRules.CharacterSet.SignedInteger;
 			bool actualResult;
 			bool expectedResult = true;
 
@@ -164,7 +164,7 @@ namespace DotNotStandard.Validation.UnitTests
 
 			// Arrange
 			string testValue = "-1.0";
-			string characterSetName = BuiltInRules.CharacterSet.Decimal;
+			string characterSetName = BuiltInRules.CharacterSet.SignedDecimal;
 			bool actualResult;
 			bool expectedResult = true;
 
@@ -182,7 +182,7 @@ namespace DotNotStandard.Validation.UnitTests
 
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.";
-			string characterSetName = BuiltInRules.CharacterSet.Alphanumeric;
+			string characterSetName = BuiltInRules.CharacterSet.LatinAlphanumeric;
 			bool actualResult;
 			bool expectedResult = false;
 
@@ -200,7 +200,7 @@ namespace DotNotStandard.Validation.UnitTests
 
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.";
-			string characterSetName = BuiltInRules.CharacterSet.FreeText;
+			string characterSetName = BuiltInRules.CharacterSet.LatinFreeText;
 			bool actualResult;
 			bool expectedResult = true;
 
@@ -218,7 +218,7 @@ namespace DotNotStandard.Validation.UnitTests
 
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.\r\nIt's even made up of multiple lines.\r\n\r\nHow lovely.";
-			string characterSetName = BuiltInRules.CharacterSet.FreeText;
+			string characterSetName = BuiltInRules.CharacterSet.LatinFreeText;
 			bool actualResult;
 			bool expectedResult = false;
 
@@ -236,7 +236,7 @@ namespace DotNotStandard.Validation.UnitTests
 
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.\r\nIt's even made up of multiple lines.\r\n\r\nHow lovely.";
-			string characterSetName = BuiltInRules.CharacterSet.FreeTextMultiLine;
+			string characterSetName = BuiltInRules.CharacterSet.LatinFreeTextMultiLine;
 			bool actualResult;
 			bool expectedResult = true;
 
@@ -254,7 +254,7 @@ namespace DotNotStandard.Validation.UnitTests
 
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.\r\nIt's even made up of multiple lines.\r\n\r\nHow lovely.<script>alert('Hi!')</script>";
-			string characterSetName = BuiltInRules.CharacterSet.FreeTextMultiLine;
+			string characterSetName = BuiltInRules.CharacterSet.LatinFreeTextMultiLine;
 			bool actualResult;
 			bool expectedResult = false;
 
