@@ -5,3 +5,6 @@ dotnet_diagnostic.CSLA0003.severity = silent
 
 # CSLA0008: Evaluate Managed Backing Fields
 dotnet_diagnostic.CSLA0008.severity = silent
+
+# CSLA0011: Find CSLA Business Objects That Are Created Outside of a ObjectFactory
+dotnet_diagnostic.CSLA0011.severity = silent

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Csla;
 using DotNotStandard.Caching.Core.InMemory;
@@ -10,17 +11,18 @@ using DotNotStandard.Validation.Core.DataAccess;
 
 // Generated from the built-in Scriban CSLA ReadOnlyRootList template
 
-namespace DesiGen.Core
+namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
 	internal class DisallowedFragmentList : ReadOnlyListBase<DisallowedFragmentList, DisallowedFragmentInfo>
 	{
 
+		private static DisallowedFragmentList _fallbackList = new DisallowedFragmentList();
 		private static InMemoryItemCache<DisallowedFragmentList> _cache = new InMemoryItemCache<DisallowedFragmentList>(
-			() => DataPortal.FetchAsync<DisallowedFragmentList>(true),
-			() => DataPortal.Fetch<DisallowedFragmentList>(),
-			TimeSpan.FromMinutes(30));
+			GetListToCacheAsync,
+			GetListToCache,
+			TimeSpan.FromMinutes(120));
 
 		#region Exposed Properties and Methods
 
@@ -68,6 +70,27 @@ namespace DesiGen.Core
 		public static DisallowedFragmentList GetDisallowedFragmentList()
 		{
 			return _cache.GetItem();
+		}
+
+		private static async Task<DisallowedFragmentList> GetListToCacheAsync()
+		{
+			DisallowedFragmentList list;
+
+			list = await DataPortal.FetchAsync<DisallowedFragmentList>(true);
+			_fallbackList = list;
+			return list;
+		}
+
+		public static DisallowedFragmentList GetListToCache()
+		{
+			if (DataPortalConfig.IsAsyncOnly)
+			{
+				return _fallbackList;
+			}
+			else
+			{ 
+				return DataPortal.Fetch<DisallowedFragmentList>();
+			}
 		}
 
 		#endregion

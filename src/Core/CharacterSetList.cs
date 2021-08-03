@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Csla;
 using DotNotStandard.Caching.Core.InMemory;
@@ -10,17 +12,18 @@ using DotNotStandard.Validation.Core.DataAccess;
 
 // Generated from the built-in Scriban CSLA ReadOnlyRootList template
 
-namespace DesiGen.Core
+namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
 	internal class CharacterSetList : ReadOnlyListBase<CharacterSetList, CharacterSetInfo>
 	{
 
+		private static CharacterSetList _fallbackList = new CharacterSetList();
 		private static InMemoryItemCache<CharacterSetList> _cache = new InMemoryItemCache<CharacterSetList>(
-			() => DataPortal.FetchAsync<CharacterSetList>(true),
-			() => DataPortal.Fetch<CharacterSetList>(),
-			TimeSpan.FromMinutes(30));
+			GetListToCacheAsync,
+			GetListToCache,
+			TimeSpan.FromMinutes(120));
 
 		#region Exposed Properties and Methods
 
@@ -66,6 +69,31 @@ namespace DesiGen.Core
 		{
 			return _cache.GetItem();
 		}
+
+		#region Cache Update Methods
+
+		private static async Task<CharacterSetList> GetListToCacheAsync()
+		{
+			CharacterSetList list;
+
+			list = await DataPortal.FetchAsync<CharacterSetList>(true);
+			_fallbackList = list;
+			return list;
+		}
+
+		private static CharacterSetList GetListToCache()
+		{
+			if (DataPortalConfig.IsAsyncOnly)
+			{
+				return _fallbackList;
+			}
+			else
+			{
+				return DataPortal.Fetch<CharacterSetList>();
+			}
+		}
+
+		#endregion
 
 		#endregion
 

@@ -5,7 +5,7 @@ using DotNotStandard.Validation.Core.DataAccess;
 
 // Generated from the built-in Scriban CSLA ReadOnlyChild template
 
-namespace DesiGen.Core
+namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
