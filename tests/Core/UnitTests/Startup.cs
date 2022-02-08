@@ -1,4 +1,10 @@
-﻿using Csla.Configuration;
+﻿/*
+ * Copyright © 2022 DotNotStandard. All rights reserved.
+ * 
+ * See the LICENSE file in the root of the repo for licensing details.
+ * 
+ */
+using Csla.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

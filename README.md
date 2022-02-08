@@ -1,5 +1,5 @@
 # DotNotStandard.Validation
-This repo contains validation utilities for use in .NET applications. This includes DataAnnotations rules for validation of strings against predefined, allowed sets of characters, as well as disallowing specifically blocked combinations of characters. In other words, we have the combination of allowed and disallowed sets, for the most effective protection.
+This repo contains validation utilities for use in .NET applications using CSLA. This includes DataAnnotations rules for validation of strings against predefined, allowed sets of characters, as well as disallowing specifically blocked combinations of characters. In other words, we have the combination of allowed and disallowed sets, for the most effective protection.
 
 ## Overview
 
@@ -15,7 +15,7 @@ Reasons to create your own implementations of repositories include:
 2. If you want additional rules that are not included in the original set.
 3. If you would like to load validation rule data from a database.
 
-Validation rules naturally form a part of the protection of your system. As such, it is important that they are maintainable, and that any fixes can quickly be redeployed, so that any loopholes can quickly be closed. Loading validation information from a database is a good way to achieve this, as the database can act as a single point of truth for many applications. However, this requires infrastructure setup, and this is often considered beyond the reach of many people who are consuming a package for the first time - the infrasstructure dependency makes it too onerous.
+Validation rules naturally form a part of the protection of your system. As such, it is important that they are maintainable, and that any fixes can quickly be redeployed, so that any loopholes can quickly be closed. Loading validation information from a database is a good way to achieve this, as the database can act as a single point of truth for many applications. However, this requires infrastructure setup, and this is often considered beyond the reach of many people who are consuming a package for the first time - the infrastructure dependency makes it too onerous. The in-memory implementation hopefully avoids that for people who are new to the package, but you should at least consider whether to make your own once you are comfortable with using it.
 
 ## Getting Started
 The following is a summary of the steps required to make use of this component.

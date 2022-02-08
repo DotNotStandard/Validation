@@ -1,4 +1,10 @@
-﻿using Csla.Core;
+﻿/*
+ * Copyright © 2022 DotNotStandard. All rights reserved.
+ * 
+ * See the LICENSE file in the root of the repo for licensing details.
+ * 
+ */
+using Csla.Core;
 using Csla.Rules;
 using System;
 using System.Collections.Generic;

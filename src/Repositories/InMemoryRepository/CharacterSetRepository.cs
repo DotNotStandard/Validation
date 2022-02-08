@@ -1,4 +1,10 @@
-﻿using DotNotStandard.Validation.Core;
+﻿/*
+ * Copyright © 2022 DotNotStandard. All rights reserved.
+ * 
+ * See the LICENSE file in the root of the repo for licensing details.
+ * 
+ */
+using DotNotStandard.Validation.Core;
 using DotNotStandard.Validation.Core.DataAccess;
 using System;
 using System.Collections.Generic;
