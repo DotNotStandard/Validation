@@ -6,67 +6,55 @@
  */
 using System;
 using System.Threading.Tasks;
-using Csla;
 using DotNotStandard.Validation.Core.DataAccess;
-
-// Generated from the built-in Scriban CSLA ReadOnlyChild template
 
 namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
-	internal class CharacterSetInfo : ReadOnlyBase<CharacterSetInfo>
+	internal class CharacterSetInfo : ICloneable
 	{
 
-		private static readonly PropertyInfo<int> _characterSetIdProperty = RegisterProperty<int>(nameof(CharacterSetId));
-		private static readonly PropertyInfo<string> _characterSetNameProperty = RegisterProperty<string>(nameof(CharacterSetName));
-		private static readonly PropertyInfo<string> _allowedCharactersProperty = RegisterProperty<string>(nameof(AllowedCharacters));
+		private readonly int _characterSetId;
+		private readonly string _characterSetName;
+		private readonly string _allowedCharacters;
 
-		#region Exposed Properties and Methods
+        #region Constructors
 
-		public int CharacterSetId
+        internal CharacterSetInfo(CharacterSetDTO data)
+        {
+			_characterSetId = data.CharacterSetId;
+			_characterSetName = data.CharacterSetName;
+			_allowedCharacters = data.AllowedCharacters;
+        }
+
+        #endregion
+
+        #region Exposed Properties and Methods
+
+        public int CharacterSetId
 		{
-			get { return GetProperty(_characterSetIdProperty); }
+			get { return _characterSetId; }
 		}
 
 		public string CharacterSetName
 		{
-			get { return GetProperty(_characterSetNameProperty); }
+			get { return _characterSetName; }
 		}
 
 		public string AllowedCharacters
 		{
-			get { return GetProperty(_allowedCharactersProperty); }
+			get { return _allowedCharacters; }
+		}
+
+		#region ICloneable Interface
+
+		public object Clone()
+		{
+			return this.MemberwiseClone();
 		}
 
 		#endregion
-
-		#region Factory Methods
-
-		private CharacterSetInfo()
-		{
-			// Enforce use of factory methods
-		}
-
-		#endregion
-
-		#region Data Access
-
-		[FetchChild]
-		private async Task DataPortal_FetchChild(CharacterSetDTO data)
-		{
-			await LoadObjectAsync(data);
-		}
-
-		private Task LoadObjectAsync(CharacterSetDTO data)
-		{
-			LoadProperty(_characterSetIdProperty, data.CharacterSetId);
-			LoadProperty(_characterSetNameProperty, data.CharacterSetName);
-			LoadProperty(_allowedCharactersProperty, data.AllowedCharacters);
-			// Complete the load by requesting children load themselves
-
-			return Task.CompletedTask;
-		}
 
 		#endregion
 

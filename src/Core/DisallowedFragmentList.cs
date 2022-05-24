@@ -11,7 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Csla;
 using DotNotStandard.Caching.Core.InMemory;
 using DotNotStandard.Validation.Core.DataAccess;
 
@@ -21,14 +20,15 @@ namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
-	internal class DisallowedFragmentList : ReadOnlyListBase<DisallowedFragmentList, DisallowedFragmentInfo>
+	internal class DisallowedFragmentList : ICloneable
 	{
 
-		private static DisallowedFragmentList _fallbackList = new DisallowedFragmentList();
-		private static InMemoryItemCache<DisallowedFragmentList> _cache = new InMemoryItemCache<DisallowedFragmentList>(
+		private static AutoRefreshingItemCache<DisallowedFragmentList> _cache = new AutoRefreshingItemCache<DisallowedFragmentList>(
+			ValidationSubsystem.GetLogger(),
 			GetListToCacheAsync,
-			GetListToCache,
+			new DisallowedFragmentList(),
 			TimeSpan.FromMinutes(120));
+		private IList<DisallowedFragmentInfo> _list = new List<DisallowedFragmentInfo>();
 
 		#region Exposed Properties and Methods
 
@@ -44,7 +44,7 @@ namespace DotNotStandard.Validation.Core
 			if (characterSetName is null) throw new ArgumentNullException(nameof(characterSetName));
 
 			// Iterate all of the children, finding any matching fragments for the requested rule by name
-			foreach (DisallowedFragmentInfo fragmentInfo in this)
+			foreach (DisallowedFragmentInfo fragmentInfo in _list)
 			{
 				// Add any child that applies to all scenarios, or this specific scenario
 				if (string.IsNullOrWhiteSpace(fragmentInfo.CharacterSetName) || 
@@ -59,18 +59,33 @@ namespace DotNotStandard.Validation.Core
 			return filteredList;
 		}
 
-		#endregion
+        #region ICloneable Interface
 
-		#region Factory Methods
+        public object Clone()
+		{
+			DisallowedFragmentList list = new DisallowedFragmentList();
+			foreach (DisallowedFragmentInfo fragmentInfo in _list)
+            {
+				list.Add((DisallowedFragmentInfo)fragmentInfo.Clone());
+            }
 
-		private DisallowedFragmentList()
+			return list;
+		}
+
+        #endregion
+
+        #endregion
+
+        #region Factory Methods
+
+        private DisallowedFragmentList()
 		{
 			// Enforce use of factory methods
 		}
 
-		public static async Task<DisallowedFragmentList> GetDisallowedFragmentListAsync()
+		public static void Initialise()
 		{
-			return await _cache.GetItemAsync().ConfigureAwait(false);
+			_cache.Initialise();
 		}
 
 		public static DisallowedFragmentList GetDisallowedFragmentList()
@@ -78,112 +93,55 @@ namespace DotNotStandard.Validation.Core
 			return _cache.GetItem();
 		}
 
-		private static async Task<DisallowedFragmentList> GetListToCacheAsync()
+		public static Task<DisallowedFragmentList> GetDisallowedFragmentListAsync()
 		{
-			DisallowedFragmentList list;
-
-			list = await DataPortal.FetchAsync<DisallowedFragmentList>(true);
-			_fallbackList = list;
-			return list;
-		}
-
-		public static DisallowedFragmentList GetListToCache()
-		{
-			if (DataPortalConfig.IsAsyncOnly)
-			{
-				return _fallbackList;
-			}
-			else
-			{ 
-				return DataPortal.Fetch<DisallowedFragmentList>();
-			}
-		}
-
-		#endregion
-
-		#region Authorisation 
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static void AddObjectAuthorizationRules()
-		{
-			// Not authorisation rules required; this is available to all users
+			return Task.FromResult(_cache.GetItem());
 		}
 
 		#endregion
 
 		#region Data Access
 
-		#region Criteria
-
-		//[Serializable]
-		//private class Criteria : CriteriaBase<Criteria>
-		//{
-		//
-		//	private static readonly PropertyInfo<int> _parentIdProperty = RegisterProperty<int>(nameof(ParentId));
-		//
-		//	public Criteria(int parentId)
-		//	{
-		//		ParentId = parentId;
-		//	}
-		//
-		//	public int ParentId
-		//	{
-		//		get { return ReadProperty(_parentIdProperty); }
-		//		private set { LoadProperty(_parentIdProperty, value); }
-		//	}
-		//}
-
-		#endregion
-
-		[Fetch]
-		private void DataPortal_Fetch([Inject] IDisallowedFragmentRepository repository)
+		private static async Task<DisallowedFragmentList> GetListToCacheAsync(CancellationToken cancellationToken)
 		{
-			IList<DisallowedFragmentDTO> items = repository.FetchList();
-			LoadObjects(items);
+			IDisallowedFragmentRepository repository;
+			DisallowedFragmentList list;
+
+			list = new DisallowedFragmentList();
+			repository = ValidationSubsystem.GetRequiredService<IDisallowedFragmentRepository>();
+			await list.DataPortal_FetchAsync(repository);
+			return list;
 		}
 
-		[Fetch]
-		private async Task DataPortal_FetchAsync(bool differentiator, [Inject] IDisallowedFragmentRepository repository)
+		private async Task DataPortal_FetchAsync(IDisallowedFragmentRepository repository)
 		{
 			IList<DisallowedFragmentDTO> items = await repository.FetchListAsync().ConfigureAwait(false);
 			await LoadObjectsAsync(items);
 		}
 
-		private void LoadObjects(IList<DisallowedFragmentDTO> items)
+		private Task LoadObjectsAsync(IList<DisallowedFragmentDTO> items)
 		{
-			bool raiseEvents;
-
-			raiseEvents = RaiseListChangedEvents;
-			RaiseListChangedEvents = false;
-			IsReadOnly = false;
+			DisallowedFragmentInfo info;
 
 			foreach (var item in items)
 			{
-				Add(DataPortal.FetchChild<DisallowedFragmentInfo>(item));
+				info = new DisallowedFragmentInfo(item);
+				_list.Add(info);
 			}
 
-			IsReadOnly = true;
-			RaiseListChangedEvents = raiseEvents;
+			return Task.CompletedTask;
 		}
 
-		private async Task LoadObjectsAsync(IList<DisallowedFragmentDTO> items)
-		{
-			bool raiseEvents;
+        #endregion
 
-			raiseEvents = RaiseListChangedEvents;
-			RaiseListChangedEvents = false;
-			IsReadOnly = false;
+        #region Private Helper Methods
 
-			foreach (var item in items)
-			{
-				Add(await DataPortal.FetchChildAsync<DisallowedFragmentInfo>(item).ConfigureAwait(false));
-			}
+		private void Add(DisallowedFragmentInfo fragmentInfo)
+        {
+			_list.Add(fragmentInfo);
+        }
 
-			IsReadOnly = true;
-			RaiseListChangedEvents = raiseEvents;
-		}
+        #endregion
 
-		#endregion
-
-	}
+    }
 }

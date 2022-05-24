@@ -28,8 +28,8 @@ namespace DotNotStandard.Validation.Core
 		{
 			CharacterSetList characterSets;
 			string allowedCharacters;
-			//DisallowedFragmentList disallowedFragmentList;
-			//IEnumerable<string> disallowedFragments;
+			DisallowedFragmentList disallowedFragmentList;
+			IEnumerable<string> disallowedFragments;
 
 			// Retrieve the allowed characters
 			characterSets = CharacterSetList.GetCharacterSetList();
@@ -41,11 +41,10 @@ namespace DotNotStandard.Validation.Core
 				return false;
 			}
 
-			// Allowed characters rule passed; now check for the presence of disallowed fragments
-			//disallowedFragmentList = DisallowedFragmentList.GetDisallowedFragmentList();
-			//disallowedFragments = disallowedFragmentList.GetDisallowedFragments(characterSetName);
-			//return StringContentValidator.DoesNotContainAnyOf(valueToTest, disallowedFragments);
-			return true;
+            // Allowed characters rule passed; now check for the presence of disallowed fragments
+            disallowedFragmentList = DisallowedFragmentList.GetDisallowedFragmentList();
+            disallowedFragments = disallowedFragmentList.GetDisallowedFragments(characterSetName);
+            return StringContentValidator.DoesNotContainAnyOf(valueToTest, disallowedFragments);
 		}
 
 		/// <summary>
@@ -58,11 +57,11 @@ namespace DotNotStandard.Validation.Core
 		{
 			CharacterSetList characterSets;
 			string allowedCharacters;
-			//DisallowedFragmentList disallowedFragmentList;
-			//IEnumerable<string> disallowedFragments;
+			DisallowedFragmentList disallowedFragmentList;
+			IEnumerable<string> disallowedFragments;
 
 			// Retrieve the allowed characters
-			characterSets = await CharacterSetList.GetCharacterSetListAsync();
+			characterSets = await CharacterSetList.GetCharacterSetListAsync().ConfigureAwait(false);
 			allowedCharacters = characterSets.GetAllowedCharacters(characterSetName);
 
 			// Delegate the testing task for allowed characters
@@ -71,11 +70,10 @@ namespace DotNotStandard.Validation.Core
 				return false;
 			}
 
-			// Allowed characters rule passed; now check for the presence of disallowed fragments
-			//disallowedFragmentList = await DisallowedFragmentList.GetDisallowedFragmentListAsync().ConfigureAwait(false);
-			//disallowedFragments = disallowedFragmentList.GetDisallowedFragments(characterSetName);
-			//return StringContentValidator.DoesNotContainAnyOf(valueToTest, disallowedFragments);
-			return true;
+            // Allowed characters rule passed; now check for the presence of disallowed fragments
+            disallowedFragmentList = await DisallowedFragmentList.GetDisallowedFragmentListAsync().ConfigureAwait(false);
+            disallowedFragments = disallowedFragmentList.GetDisallowedFragments(characterSetName);
+            return StringContentValidator.DoesNotContainAnyOf(valueToTest, disallowedFragments);
 
 		}
 

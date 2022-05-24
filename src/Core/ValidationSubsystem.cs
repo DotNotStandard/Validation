@@ -8,18 +8,44 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DotNotStandard.Validation.Core
 {
-	public static class ValidationSubsystem
+	public class ValidationSubsystem
 	{
+		private static IServiceProvider _serviceProvider;
 
-		public static async Task InitialiseAsync()
+        #region Constructors
+
+        private ValidationSubsystem()
+        {
+			// Disallow instantiation of the type
+        }
+
+        #endregion
+
+        #region Exposed Properties and Methods
+
+        public static T GetRequiredService<T>()
+        {
+			return _serviceProvider.GetRequiredService<T>();
+        }
+
+		public static ILogger GetLogger()
 		{
-			DataPortalConfig.ForceToAsyncOnly();
-			_ = await CharacterSetList.GetCharacterSetListAsync();
-			_ = await DisallowedFragmentList.GetDisallowedFragmentListAsync();
+			return _serviceProvider.GetRequiredService<ILogger<ValidationSubsystem>>();
 		}
 
-	}
+		public static void Initialise(IServiceProvider serviceProvider)
+		{
+			_serviceProvider = serviceProvider;
+			CharacterSetList.Initialise();
+			DisallowedFragmentList.Initialise();
+		}
+
+        #endregion
+
+    }
 }

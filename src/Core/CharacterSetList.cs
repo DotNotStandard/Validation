@@ -12,24 +12,22 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Csla;
 using DotNotStandard.Caching.Core.InMemory;
 using DotNotStandard.Validation.Core.DataAccess;
-
-// Generated from the built-in Scriban CSLA ReadOnlyRootList template
 
 namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
-	internal class CharacterSetList : ReadOnlyListBase<CharacterSetList, CharacterSetInfo>
+	internal class CharacterSetList : ICloneable
 	{
 
-		private static CharacterSetList _fallbackList = new CharacterSetList();
-		private static InMemoryItemCache<CharacterSetList> _cache = new InMemoryItemCache<CharacterSetList>(
+		private static AutoRefreshingItemCache<CharacterSetList> _cache = new AutoRefreshingItemCache<CharacterSetList>(
+			ValidationSubsystem.GetLogger(),
 			GetListToCacheAsync,
-			GetListToCache,
+			new CharacterSetList(),
 			TimeSpan.FromMinutes(120));
+		private IList<CharacterSetInfo> _list = new List<CharacterSetInfo>();
 
 		#region Exposed Properties and Methods
 
@@ -44,7 +42,7 @@ namespace DotNotStandard.Validation.Core
 			if (characterSetName is null) throw new ArgumentNullException(nameof(characterSetName));
 
 			// Iterate all of the children, finding the matching character set by name
-			foreach (CharacterSetInfo characterSet in this)
+			foreach (CharacterSetInfo characterSet in _list)
 			{
 				if (characterSet.CharacterSetName.Equals(characterSetName, StringComparison.InvariantCultureIgnoreCase))
 				{ 
@@ -66,9 +64,14 @@ namespace DotNotStandard.Validation.Core
 			// Enforce use of factory methods
 		}
 
-		public static async Task<CharacterSetList> GetCharacterSetListAsync()
+		public static void Initialise()
+        {
+			_cache.Initialise();
+        }
+
+		public static Task<CharacterSetList> GetCharacterSetListAsync()
 		{
-			return await _cache.GetItemAsync().ConfigureAwait(false);
+			return Task.FromResult(_cache.GetItem());
 		}
 
 		public static CharacterSetList GetCharacterSetList()
@@ -76,116 +79,69 @@ namespace DotNotStandard.Validation.Core
 			return _cache.GetItem();
 		}
 
-		#region Cache Update Methods
+		#region ICloneable Interface
 
-		private static async Task<CharacterSetList> GetListToCacheAsync()
+		public object Clone()
 		{
-			CharacterSetList list;
+			CharacterSetList list = new CharacterSetList();
+			foreach (CharacterSetInfo setInfo in _list)
+			{
+				list.Add((CharacterSetInfo)setInfo.Clone());
+			}
 
-			list = await DataPortal.FetchAsync<CharacterSetList>(true);
-			_fallbackList = list;
 			return list;
 		}
 
-		private static CharacterSetList GetListToCache()
+		#endregion
+
+		#region Cache Update Methods
+
+		private static async Task<CharacterSetList> GetListToCacheAsync(CancellationToken cancellationToken)
 		{
-			if (DataPortalConfig.IsAsyncOnly)
-			{
-				return _fallbackList;
-			}
-			else
-			{
-				return DataPortal.Fetch<CharacterSetList>();
-			}
+			ICharacterSetRepository repository;
+			CharacterSetList list;
+
+			repository = ValidationSubsystem.GetRequiredService<ICharacterSetRepository>();
+			list = new CharacterSetList();
+			await list.DataPortal_FetchAsync(repository);
+			return list;
 		}
 
 		#endregion
-
-		#endregion
-
-		#region Authorisation 
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static void AddObjectAuthorizationRules()
-		{
-			// Not authorisation rules required; this is available to all users
-		}
 
 		#endregion
 
 		#region Data Access
 
-		#region Criteria
-
-		//[Serializable]
-		//private class Criteria : CriteriaBase<Criteria>
-		//{
-		//
-		//	private static readonly PropertyInfo<int> _parentIdProperty = RegisterProperty<int>(nameof(ParentId));
-		//
-		//	public Criteria(int parentId)
-		//	{
-		//		ParentId = parentId;
-		//	}
-		//
-		//	public int ParentId
-		//	{
-		//		get { return ReadProperty(_parentIdProperty); }
-		//		private set { LoadProperty(_parentIdProperty, value); }
-		//	}
-		//}
-
-		#endregion
-
-		[Fetch]
-		private void DataPortal_Fetch([Inject] ICharacterSetRepository repository)
-		{
-			IList<CharacterSetDTO> items = repository.FetchList();
-			LoadObjects(items);
-		}
-
-		[Fetch]
-		private async Task DataPortal_FetchAsync(bool differentiator, [Inject] ICharacterSetRepository repository)
+		private async Task DataPortal_FetchAsync(ICharacterSetRepository repository)
 		{
 			IList<CharacterSetDTO> items = await repository.FetchListAsync().ConfigureAwait(false);
 			await LoadObjectsAsync(items);
 		}
 
-		private void LoadObjects(IList<CharacterSetDTO> items)
+		private Task LoadObjectsAsync(IList<CharacterSetDTO> items)
 		{
-			bool raiseEvents;
-
-			raiseEvents = RaiseListChangedEvents;
-			RaiseListChangedEvents = false;
-			IsReadOnly = false;
+			CharacterSetInfo info;
 
 			foreach (var item in items)
 			{
-				Add(DataPortal.FetchChild<CharacterSetInfo>(item));
+				info = new CharacterSetInfo(item);
+				_list.Add(info);
 			}
 
-			IsReadOnly = true;
-			RaiseListChangedEvents = raiseEvents;
+			return Task.CompletedTask;
 		}
 
-		private async Task LoadObjectsAsync(IList<CharacterSetDTO> items)
-		{
-			bool raiseEvents;
+        #endregion
 
-			raiseEvents = RaiseListChangedEvents;
-			RaiseListChangedEvents = false;
-			IsReadOnly = false;
+        #region Private Helper Methods
 
-			foreach (var item in items)
-			{
-				Add(await DataPortal.FetchChildAsync<CharacterSetInfo>(item).ConfigureAwait(false));
-			}
+		private void Add(CharacterSetInfo setInfo)
+        {
+			_list.Add(setInfo);
+        }
 
-			IsReadOnly = true;
-			RaiseListChangedEvents = raiseEvents;
-		}
+        #endregion
 
-		#endregion
-
-	}
+    }
 }
