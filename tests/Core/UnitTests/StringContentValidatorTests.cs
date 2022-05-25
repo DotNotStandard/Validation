@@ -8,14 +8,20 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using DotNotStandard.Validation.Core;
 
-namespace DotNotStandard.Validation.UnitTests
+namespace DotNotStandard.Validation.Core.UnitTests
 {
 
 	[TestClass]
 	public class StringContentValidatorTests
 	{
+		private static ValidationTestFactory _validationTestFactory;
+
+		[ClassInitialize]
+		public static void Initialise(TestContext testContext)
+		{
+			_validationTestFactory = ValidationTestFactory.InitialiseValidation();
+		}
 
 		#region ContainsOnly
 

@@ -16,8 +16,6 @@ namespace DotNotStandard.Validation.Core.DataAccess
 	public interface IDisallowedFragmentRepository
 	{
 
-		IList<DisallowedFragmentDTO> FetchList();
-
 		Task<IList<DisallowedFragmentDTO>> FetchListAsync();
 
 	}

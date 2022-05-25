@@ -11,12 +11,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotNotStandard.Validation.UnitTests
+namespace DotNotStandard.Validation.Core.UnitTests
 {
 
 	[TestClass]
 	public class CharacterSetValidatorTests
 	{
+		private static ValidationTestFactory _validationTestFactory;
+
+        [ClassInitialize]
+		public static void Initialise(TestContext testContext)
+        {
+			_validationTestFactory = ValidationTestFactory.InitialiseValidation();
+        }
 
 		#region GetIsValid
 
@@ -27,11 +34,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = null;
 			string characterSetName = BuiltInRules.CharacterSet.PositiveInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -45,11 +53,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = string.Empty;
 			string characterSetName = BuiltInRules.CharacterSet.PositiveInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -63,11 +72,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "1";
 			string characterSetName = BuiltInRules.CharacterSet.PositiveInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -81,11 +91,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "-1";
 			string characterSetName = BuiltInRules.CharacterSet.PositiveInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = false;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -99,11 +110,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "-1";
 			string characterSetName = BuiltInRules.CharacterSet.SignedInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -117,11 +129,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "1.0";
 			string characterSetName = BuiltInRules.CharacterSet.PositiveInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = false;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -135,11 +148,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "1.0";
 			string characterSetName = BuiltInRules.CharacterSet.PositiveDecimal;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -153,11 +167,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "-1.0";
 			string characterSetName = BuiltInRules.CharacterSet.PositiveDecimal;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = false;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -171,11 +186,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "-1.0";
 			string characterSetName = BuiltInRules.CharacterSet.SignedDecimal;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -189,11 +205,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.";
 			string characterSetName = BuiltInRules.CharacterSet.LatinAlphanumeric;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = false;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -207,11 +224,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.";
 			string characterSetName = BuiltInRules.CharacterSet.LatinFreeText;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -225,11 +243,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.\r\nIt's even made up of multiple lines.\r\n\r\nHow lovely.";
 			string characterSetName = BuiltInRules.CharacterSet.LatinFreeText;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = false;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -243,11 +262,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.\r\nIt's even made up of multiple lines.\r\n\r\nHow lovely.";
 			string characterSetName = BuiltInRules.CharacterSet.LatinFreeTextMultiLine;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -261,11 +281,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = "This is a test of a full sentence, including punctuation.\r\nIt's even made up of multiple lines.\r\n\r\nHow lovely.<script>alert('Hi!')</script>";
 			string characterSetName = BuiltInRules.CharacterSet.LatinFreeTextMultiLine;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = false;
 
 			// Act
-			actualResult = CharacterSetValidator.GetIsValid(testValue, characterSetName);
+			actualResult = validator.GetIsValid(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -283,11 +304,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = null;
 			string characterSetName = BuiltInRules.CharacterSet.PositiveInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = await CharacterSetValidator.GetIsValidAsync(testValue, characterSetName);
+			actualResult = await validator.GetIsValidAsync(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);
@@ -301,11 +323,12 @@ namespace DotNotStandard.Validation.UnitTests
 			// Arrange
 			string testValue = string.Empty;
 			string characterSetName = BuiltInRules.CharacterSet.PositiveInteger;
+			CharacterSetValidator validator = _validationTestFactory.GetCharacterSetValidator();
 			bool actualResult;
 			bool expectedResult = true;
 
 			// Act
-			actualResult = await CharacterSetValidator.GetIsValidAsync(testValue, characterSetName);
+			actualResult = await validator.GetIsValidAsync(testValue, characterSetName);
 
 			// Assert
 			Assert.AreEqual(expectedResult, actualResult);

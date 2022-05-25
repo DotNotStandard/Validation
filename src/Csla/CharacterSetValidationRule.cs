@@ -38,7 +38,8 @@ namespace DotNotStandard.Validation.Core
 			}
 
 			// Peform the validation test on the value we have been provided
-			if (!await CharacterSetValidator.GetIsValidAsync(value, _allowedCharacterSetName))
+			CharacterSetValidator validator = context.ApplicationContext.CreateInstanceDI<CharacterSetValidator>();
+			if (!await validator.GetIsValidAsync(value, _allowedCharacterSetName))
 			{
 				context.AddErrorResult($"{PrimaryProperty.FriendlyName} contains invalid characters!");
 			}

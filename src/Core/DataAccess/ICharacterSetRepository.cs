@@ -16,8 +16,6 @@ namespace DotNotStandard.Validation.Core.DataAccess
 	public interface ICharacterSetRepository
 	{
 
-		IList<CharacterSetDTO> FetchList();
-
 		Task<IList<CharacterSetDTO>> FetchListAsync();
 
 	}

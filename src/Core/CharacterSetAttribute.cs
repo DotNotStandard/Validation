@@ -20,25 +20,34 @@ namespace DotNotStandard.Validation.Core
 
 		#region Constructors
 
-		public CharacterSetAttribute(string characterSetName)
+		public CharacterSetAttribute(string characterSetName) : base("{0} contains invalid characters")
 		{
 			_characterSetName = characterSetName;
 		}
 
-		#endregion
+        #endregion
 
-		#region Method Overrides
+        #region Base Overrides
 
-		public override bool IsValid(object value)
+        public override bool RequiresValidationContext => true;
+
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
 		{
-			bool result;
+			CharacterSetValidator validator;
+			string message;
 
-			if (value is null) return true;
+			if (validationContext is null) throw new ArgumentNullException(nameof(validationContext));
+			if (value is null) return ValidationResult.Success;
 
 			// Delegate the test to the validator class and return the result
-			result = CharacterSetValidator.GetIsValid(value.ToString(), _characterSetName);
+			validator = (CharacterSetValidator)validationContext.GetService(typeof(CharacterSetValidator));
+			if (validator.GetIsValid(value.ToString(), _characterSetName))
+            {
+				return ValidationResult.Success;
+            }
 
-			return result;
+			message = FormatErrorMessage(validationContext.DisplayName);
+			return new ValidationResult(message);
 		}
 
 		#endregion

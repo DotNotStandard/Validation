@@ -20,15 +20,19 @@ namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
-	internal class DisallowedFragmentList : ICloneable
+	public class DisallowedFragmentList : ICloneable
 	{
 
-		private static AutoRefreshingItemCache<DisallowedFragmentList> _cache = new AutoRefreshingItemCache<DisallowedFragmentList>(
-			ValidationSubsystem.GetLogger(),
-			GetListToCacheAsync,
-			new DisallowedFragmentList(),
-			TimeSpan.FromMinutes(120));
 		private IList<DisallowedFragmentInfo> _list = new List<DisallowedFragmentInfo>();
+
+		#region Constructors
+
+		internal DisallowedFragmentList()
+		{
+			// Restrict access to create instances of the type
+		}
+
+		#endregion
 
 		#region Exposed Properties and Methods
 
@@ -61,6 +65,11 @@ namespace DotNotStandard.Validation.Core
 
         #region ICloneable Interface
 
+		/// <summary>
+		/// Create a complete, deep clone the list.
+		/// Used by the underlying cache to avoid threading issues.
+		/// </summary>
+		/// <returns>A completely new instance of the list</returns>
         public object Clone()
 		{
 			DisallowedFragmentList list = new DisallowedFragmentList();
@@ -76,49 +85,22 @@ namespace DotNotStandard.Validation.Core
 
         #endregion
 
-        #region Factory Methods
-
-        private DisallowedFragmentList()
-		{
-			// Enforce use of factory methods
-		}
-
-		public static void Initialise()
-		{
-			_cache.Initialise();
-		}
-
-		public static DisallowedFragmentList GetDisallowedFragmentList()
-		{
-			return _cache.GetItem();
-		}
-
-		public static Task<DisallowedFragmentList> GetDisallowedFragmentListAsync()
-		{
-			return Task.FromResult(_cache.GetItem());
-		}
-
-		#endregion
-
 		#region Data Access
 
-		private static async Task<DisallowedFragmentList> GetListToCacheAsync(CancellationToken cancellationToken)
-		{
-			IDisallowedFragmentRepository repository;
-			DisallowedFragmentList list;
-
-			list = new DisallowedFragmentList();
-			repository = ValidationSubsystem.GetRequiredService<IDisallowedFragmentRepository>();
-			await list.DataPortal_FetchAsync(repository);
-			return list;
-		}
-
-		private async Task DataPortal_FetchAsync(IDisallowedFragmentRepository repository)
+		/// <summary>
+		/// Load the internal list from the underlying data source
+		/// </summary>
+		/// <param name="repository">The repository from which to load the data</param>
+		internal async Task LoadListAsync(IDisallowedFragmentRepository repository)
 		{
 			IList<DisallowedFragmentDTO> items = await repository.FetchListAsync().ConfigureAwait(false);
 			await LoadObjectsAsync(items);
 		}
 
+		/// <summary>
+		/// Helper method for loading of the list from the data source
+		/// </summary>
+		/// <param name="items">The list of items returned by the data source</param>
 		private Task LoadObjectsAsync(IList<DisallowedFragmentDTO> items)
 		{
 			DisallowedFragmentInfo info;
@@ -132,10 +114,14 @@ namespace DotNotStandard.Validation.Core
 			return Task.CompletedTask;
 		}
 
-        #endregion
+		#endregion
 
-        #region Private Helper Methods
+		#region Private Helper Methods
 
+		/// <summary>
+		/// Support addition of new items to the underlying list for use in cloning
+		/// </summary>
+		/// <param name="fragmentInfo">The disallowed fragment info to be added to the list</param>
 		private void Add(DisallowedFragmentInfo fragmentInfo)
         {
 			_list.Add(fragmentInfo);

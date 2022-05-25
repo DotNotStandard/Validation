@@ -1,5 +1,5 @@
 # DotNotStandard.Validation
-This repo contains validation utilities for use in .NET applications using CSLA. This includes DataAnnotations rules for validation of strings against predefined, allowed sets of characters, as well as disallowing specifically blocked combinations of characters. In other words, we have the combination of allowed and disallowed sets, for the most effective protection.
+This repo contains validation utilities for use in .NET applications. This includes DataAnnotations rules for validation of strings against predefined, allowed sets of characters, as well as disallowing specifically blocked combinations of characters. In other words, we have the combination of allowed and disallowed sets, for the most effective protection.
 
 ## Overview
 
@@ -15,7 +15,7 @@ Reasons to create your own implementations of repositories include:
 2. If you want additional rules that are not included in the original set.
 3. If you would like to load validation rule data from a database.
 
-Validation rules naturally form a part of the protection of your system. As such, it is important that they are maintainable, and that any fixes can quickly be redeployed, so that any loopholes can quickly be closed. Loading validation information from a database is a good way to achieve this, as the database can act as a single point of truth for many applications. However, this requires infrastructure setup, and this is often considered beyond the reach of many people who are consuming a package for the first time - the infrastructure dependency makes it too onerous. The in-memory implementation hopefully avoids that for people who are new to the package, but you should at least consider whether to make your own once you are comfortable with using it.
+Validation rules naturally form a part of the protection of your system. As such, it is important that they are maintainable, and that any fixes can quickly be redeployed, so that any loopholes can quickly be closed. Loading validation information from a database is a good way to achieve this, as the database can act as a single point of truth for many applications. However, this requires infrastructure setup, and this is often considered beyond the reach of many people who are consuming a package for the first time - the infrastructure dependency makes it too onerous. The in-memory implementation hopefully avoids that for people who are new to the package, but you should at least consider whether to make your own once you are comfortable with using the package.
 
 ## Getting Started
 The following is a summary of the steps required to make use of this component.
@@ -27,52 +27,51 @@ The following is a summary of the steps required to make use of this component.
 
     `services.AddValidationInMemoryRepositories();`
 
-4. Annotate the property to be validated with the [CharacterSet("RuleName")] attribute, specifying the key of the appropriate rule.
-5. The BuiltInRules class exposes a set of constants of common rule names, to avoid the need for magic strings.
+5. New in v2.0 - Initialise the validation subsystem. For example, in Startup.cs add:
+
+    `ValidationSubsystem.Initialise(serviceProvider);`
+
+6. Annotate the property to be validated with the [CharacterSet("RuleName")] attribute, specifying the key of the appropriate rule.
+7. The BuiltInRules class exposes a set of constants of common rule names, to avoid the need for magic strings.
 
 Here is a typical property definition for a validated property:
 
+``` csharp
     [Required]
     [MaxLength(100)]
     [CharacterSet(BuiltInRules.CharacterSet.LatinAlphanumeric)]  
     public string Name {get; set;}
+```
 
 Note that the character sets against which validation can be applied are not limited by the list of constants defined on the BuiltInRules class. The property on the attribute is of type string, and any string can be passed, as long as the repository exposes data for that rule. Consider creating your own class exposing additional constants for your own, custom rules, if you want to add more rules.
 
 For example, create a static class called MyRules:
 
+``` csharp
     public static class MyRules
     {
         public const string CapitalA = "MyRules.CapitalA";
     }
+```
 
 Now, make use of the constants to request validation against a rule of that name:
 
+``` csharp
     [CharacterSet(MyRules.CapitalA)]  
     public string Name {get; set;}
-
+```
 Remember that the repository implementation must return a rule for this key, in this case the key is the contents of the string constant: "MyRules.CapitalA".
 
-## Use Under WebAssembly
-WebAssembly does not support synchronous data access, which is the default data access method for the data annotations framework that this library integrates with. 
-To overcome this limitation, you *must* initialise the validation subsystem asynchronously before use, using the following code fragment:
+## Initialisation
+From v2.0 onwards, the validation subsystem uses an automatically refreshing in-memory cache to hold validation rules drawn from the backing repository. This auto-refreshing cache must be initialised before the subsystem can perform as intended.
 
-```
-await ValidationSubsystem.InitialiseAsync();
-```
+Several initialisation mechanisms are provided, but by far the simplest is the blocking Initialise() method of the static ValidationSubsystem type. Calling this method at the end of Startup.cs or Program.cs is the simplest approach
 
-In Blazor WebAssembly, this is best done in the OnInitializedAsync method of App.razor, using this code:
+    `ValidationSubsystem.Initialise(serviceProvider);`
 
-```
-protected override async Task OnInitializedAsync()
-{
-    await base.OnInitializedAsync();
-    await DotNotStandard.Validation.Core.ValidationSubsystem.InitialiseAsync();
-}
-```
+Be warned that this simple approach does have a downside: this method will block until initialisation has been completed. If the repository that acts as the data source is not able to provide data (for example because the underlying source is offline) then the application will be unable to start. For this reason, there is an alternative option: you may call StartInitialisation() to initiate background initialisation. You can then, optionally, call TryCompleteInitialisation(TimeSpan timeout) at the latest possible point in your application to ensure that initialisation has completed successfully.
 
-This initialisation step is only required in circumstances where synchronous data access is inappropriate or unsupported. 
-Initialisation disables refreshing of data when accessed through synchronous methods, such as when using the data annotations attributes on your business classes. 
-Data is effectively cached indefinitely in this mode. This has the disadvantage that changes to the validation rules in the data store will not be used in the application until it is restarted. 
-If you use a repository that enables you to make rapid changes, you lose the benefit of those rules being deployed more quickly. 
-This opens you to a little more risk as those changes may have been made to fix a security issue, but is the only option in an environment where synchronous data access is not supported.
+Validation will be unable to operate as intended if initialisation is not completed, as the data used by the subsystem will be unavailable. Weigh up the importance of validation with the importance of the consuming application in deciding what should happen if initialisation cannot be completed successfully.
+
+## Historical documentation
+Documentation on old features that are no longer applicable in the latest package versions can be found in the docs folder.

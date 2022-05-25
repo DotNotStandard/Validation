@@ -19,25 +19,29 @@ namespace DotNotStandard.Validation.Core
 {
 
 	[Serializable]
-	internal class CharacterSetList : ICloneable
+	public class CharacterSetList : ICloneable
 	{
 
-		private static AutoRefreshingItemCache<CharacterSetList> _cache = new AutoRefreshingItemCache<CharacterSetList>(
-			ValidationSubsystem.GetLogger(),
-			GetListToCacheAsync,
-			new CharacterSetList(),
-			TimeSpan.FromMinutes(120));
 		private IList<CharacterSetInfo> _list = new List<CharacterSetInfo>();
 
-		#region Exposed Properties and Methods
+		#region Constructors
 
-		/// <summary>
-		/// Method to return the allowed characters for a character set identified by name
-		/// </summary>
-		/// <param name="characterSetName">The name of the character set for which the allowed characters are required</param>
-		/// <returns>A string containing the allowed characters for the requested rule identified by name</returns>
-		/// <remarks>Throws an ArgumentOutOfRangeException if the name is not recognised</remarks>
-		public string GetAllowedCharacters(string characterSetName)
+		internal CharacterSetList()
+		{
+			// Restrict access to construction of this type
+		}
+
+        #endregion
+
+        #region Exposed Properties and Methods
+
+        /// <summary>
+        /// Method to return the allowed characters for a character set identified by name
+        /// </summary>
+        /// <param name="characterSetName">The name of the character set for which the allowed characters are required</param>
+        /// <returns>A string containing the allowed characters for the requested rule identified by name</returns>
+        /// <remarks>Throws an ArgumentOutOfRangeException if the name is not recognised</remarks>
+        public string GetAllowedCharacters(string characterSetName)
 		{
 			if (characterSetName is null) throw new ArgumentNullException(nameof(characterSetName));
 
@@ -55,32 +59,13 @@ namespace DotNotStandard.Validation.Core
 			throw new ArgumentOutOfRangeException($"Requested character set {characterSetName} is not defined!");
 		}
 
-		#endregion
-
-		#region Factory Methods
-
-		private CharacterSetList()
-		{
-			// Enforce use of factory methods
-		}
-
-		public static void Initialise()
-        {
-			_cache.Initialise();
-        }
-
-		public static Task<CharacterSetList> GetCharacterSetListAsync()
-		{
-			return Task.FromResult(_cache.GetItem());
-		}
-
-		public static CharacterSetList GetCharacterSetList()
-		{
-			return _cache.GetItem();
-		}
-
 		#region ICloneable Interface
 
+		/// <summary>
+		/// Create a complete, disconnected clone of the list.
+		/// Used by the underlying cache to avoid threading issues
+		/// </summary>
+		/// <returns>A complete, deep clone of the list</returns>
 		public object Clone()
 		{
 			CharacterSetList list = new CharacterSetList();
@@ -94,31 +79,24 @@ namespace DotNotStandard.Validation.Core
 
 		#endregion
 
-		#region Cache Update Methods
-
-		private static async Task<CharacterSetList> GetListToCacheAsync(CancellationToken cancellationToken)
-		{
-			ICharacterSetRepository repository;
-			CharacterSetList list;
-
-			repository = ValidationSubsystem.GetRequiredService<ICharacterSetRepository>();
-			list = new CharacterSetList();
-			await list.DataPortal_FetchAsync(repository);
-			return list;
-		}
-
-		#endregion
-
 		#endregion
 
 		#region Data Access
 
-		private async Task DataPortal_FetchAsync(ICharacterSetRepository repository)
+		/// <summary>
+		/// Load the internal list from the underlying data source
+		/// </summary>
+		/// <param name="repository">The repository from which to load the data</param>
+		internal async Task LoadListAsync(ICharacterSetRepository repository)
 		{
 			IList<CharacterSetDTO> items = await repository.FetchListAsync().ConfigureAwait(false);
 			await LoadObjectsAsync(items);
 		}
 
+		/// <summary>
+		/// Helper method for loading of the list from the data source
+		/// </summary>
+		/// <param name="items">The list of items returned by the data source</param>
 		private Task LoadObjectsAsync(IList<CharacterSetDTO> items)
 		{
 			CharacterSetInfo info;
@@ -136,6 +114,10 @@ namespace DotNotStandard.Validation.Core
 
         #region Private Helper Methods
 
+		/// <summary>
+		/// Support addition of new items to the underlying list for use in cloning
+		/// </summary>
+		/// <param name="setInfo">The character set info to be added to the list</param>
 		private void Add(CharacterSetInfo setInfo)
         {
 			_list.Add(setInfo);

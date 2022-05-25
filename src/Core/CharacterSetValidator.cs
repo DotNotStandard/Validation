@@ -15,16 +15,29 @@ namespace DotNotStandard.Validation.Core
 	/// <summary>
 	/// Character set validation using character set names to look up the appropriate rule
 	/// </summary>
-	public static class CharacterSetValidator
+	public class CharacterSetValidator
 	{
 
-		/// <summary>
-		/// Synchronously test the validity of a string value against the defined character set
-		/// </summary>
-		/// <param name="valueToTest">The string that is to be tested for validity</param>
-		/// <param name="characterSetName">The name of the character set against which to test</param>
-		/// <returns>Boolean true if the string is valid based on the defined rule, otherwise false</returns>
-		public static bool GetIsValid(string valueToTest, string characterSetName)
+		private readonly ICharacterSetListCache _characterSetListCache;
+		private readonly IDisallowedFragmentListCache _disallowedFragmentListCache;
+
+        #region Constructors
+
+        public CharacterSetValidator(ICharacterSetListCache characterSetListCache, IDisallowedFragmentListCache disallowedFragmentListCache)
+        {
+			_characterSetListCache = characterSetListCache;
+			_disallowedFragmentListCache = disallowedFragmentListCache;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Synchronously test the validity of a string value against the defined character set
+        /// </summary>
+        /// <param name="valueToTest">The string that is to be tested for validity</param>
+        /// <param name="characterSetName">The name of the character set against which to test</param>
+        /// <returns>Boolean true if the string is valid based on the defined rule, otherwise false</returns>
+        public bool GetIsValid(string valueToTest, string characterSetName)
 		{
 			CharacterSetList characterSets;
 			string allowedCharacters;
@@ -32,7 +45,7 @@ namespace DotNotStandard.Validation.Core
 			IEnumerable<string> disallowedFragments;
 
 			// Retrieve the allowed characters
-			characterSets = CharacterSetList.GetCharacterSetList();
+			characterSets = _characterSetListCache.GetCharacterSetList();
 			allowedCharacters = characterSets.GetAllowedCharacters(characterSetName);
 
 			// Delegate the testing task for allowed characters
@@ -42,7 +55,7 @@ namespace DotNotStandard.Validation.Core
 			}
 
             // Allowed characters rule passed; now check for the presence of disallowed fragments
-            disallowedFragmentList = DisallowedFragmentList.GetDisallowedFragmentList();
+            disallowedFragmentList = _disallowedFragmentListCache.GetDisallowedFragmentList();
             disallowedFragments = disallowedFragmentList.GetDisallowedFragments(characterSetName);
             return StringContentValidator.DoesNotContainAnyOf(valueToTest, disallowedFragments);
 		}
@@ -53,7 +66,7 @@ namespace DotNotStandard.Validation.Core
 		/// <param name="valueToTest">The string that is to be tested for validity</param>
 		/// <param name="characterSetName">The name of the character set against which to test</param>
 		/// <returns>Boolean true if the string is valid based on the defined rule, otherwise false</returns>
-		public static async Task<bool> GetIsValidAsync(string valueToTest, string characterSetName)
+		public async Task<bool> GetIsValidAsync(string valueToTest, string characterSetName)
 		{
 			CharacterSetList characterSets;
 			string allowedCharacters;
@@ -61,7 +74,7 @@ namespace DotNotStandard.Validation.Core
 			IEnumerable<string> disallowedFragments;
 
 			// Retrieve the allowed characters
-			characterSets = await CharacterSetList.GetCharacterSetListAsync().ConfigureAwait(false);
+			characterSets = await _characterSetListCache.GetCharacterSetListAsync().ConfigureAwait(false);
 			allowedCharacters = characterSets.GetAllowedCharacters(characterSetName);
 
 			// Delegate the testing task for allowed characters
@@ -71,7 +84,7 @@ namespace DotNotStandard.Validation.Core
 			}
 
             // Allowed characters rule passed; now check for the presence of disallowed fragments
-            disallowedFragmentList = await DisallowedFragmentList.GetDisallowedFragmentListAsync().ConfigureAwait(false);
+            disallowedFragmentList = await _disallowedFragmentListCache.GetDisallowedFragmentListAsync().ConfigureAwait(false);
             disallowedFragments = disallowedFragmentList.GetDisallowedFragments(characterSetName);
             return StringContentValidator.DoesNotContainAnyOf(valueToTest, disallowedFragments);
 
