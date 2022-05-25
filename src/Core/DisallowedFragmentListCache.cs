@@ -123,11 +123,11 @@ namespace DotNotStandard.Validation.Core
                 repository = _repositoryFactory.CreateDisallowedFragmentRepository();
                 try
                 {
-                    await list.LoadListAsync(repository);
+                    await list.LoadListAsync(repository).ConfigureAwait(false);
                 }
                 finally
                 {
-                    await DisposeRepositoryAsync(repository);
+                    await DisposeRepositoryAsync(repository).ConfigureAwait(false);
                 }
 
                 return list;
@@ -148,12 +148,14 @@ namespace DotNotStandard.Validation.Core
         {
             if (repository is IAsyncDisposable asyncDisposable)
             {
-                await asyncDisposable.DisposeAsync();
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                GC.SuppressFinalize(this);
                 return;
             }
             if (repository is IDisposable disposable)
             {
                 disposable.Dispose();
+                GC.SuppressFinalize(this);
                 return;
             }
         }
