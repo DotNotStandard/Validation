@@ -14,6 +14,7 @@
     <RepositoryUrl>https://github.com/DotNotStandard/Validation</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Validation, DataAnnotations, DotNotStandard</PackageTags>
+	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
