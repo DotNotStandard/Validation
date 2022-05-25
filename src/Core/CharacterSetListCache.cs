@@ -16,23 +16,28 @@ using System.Threading.Tasks;
 
 namespace DotNotStandard.Validation.Core
 {
+    /// <summary>
+    /// A cache of character sets. Makes use of the auto refreshing cache from
+    /// the DotNotStandard.Caching package to ensure that up to date data is provided.
+    /// </summary>
     internal class CharacterSetListCache : ICharacterSetListCache, ICharacterSetListCacheInitialiser
     {
         private readonly AutoRefreshingItemCache<CharacterSetList> _cache;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
+        private readonly ICharacterSetRepositoryFactory _repositoryFactory;
 
         #region Constructors
 
-        public CharacterSetListCache(ILogger<CharacterSetListCache> logger, IServiceProvider serviceProvider)
+        public CharacterSetListCache(ILogger<CharacterSetListCache> logger, ICharacterSetRepositoryFactory repositoryFactory)
         {
-            _serviceProvider = serviceProvider;
+            _logger = logger;
+            _repositoryFactory = repositoryFactory;
             _cache = new AutoRefreshingItemCache<CharacterSetList>(
                logger,
                GetListToCacheAsync,
                new CharacterSetList(),
                TimeSpan.FromMinutes(120)
                );
-
         }
 
         #endregion
@@ -111,10 +116,44 @@ namespace DotNotStandard.Validation.Core
             ICharacterSetRepository repository;
             CharacterSetList list;
 
-            repository = _serviceProvider.GetRequiredService<ICharacterSetRepository>();
-            list = new CharacterSetList();
-            await list.LoadListAsync(repository);
-            return list;
+            try
+            {
+                list = new CharacterSetList();
+                repository = _repositoryFactory.CreateCharacterSetRepository();
+                try
+                {
+                    await list.LoadListAsync(repository);
+                }
+                finally
+                {
+                    await DisposeRepositoryAsync(repository);
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception during list retrieval");
+                throw;
+            }
+
+        }
+
+        /// <summary>
+        /// Attempt to clean up any resources used by the repository
+        /// </summary>
+        /// <param name="repository">The repository instance that we created</param>
+        private async Task DisposeRepositoryAsync(ICharacterSetRepository repository)
+        {
+            if (repository is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+                return;
+            }
+            if (repository is IDisposable disposable)
+            {
+                disposable.Dispose();
+                return;
+            }
         }
 
         #endregion

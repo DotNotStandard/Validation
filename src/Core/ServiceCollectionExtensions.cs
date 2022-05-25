@@ -5,6 +5,7 @@
  * 
  */
 using DotNotStandard.Validation.Core;
+using DotNotStandard.Validation.Core.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,6 +27,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ValidationSubsystem>();
             services.AddSingleton<ICharacterSetListCache, CharacterSetListCache>();
             services.AddSingleton<IDisallowedFragmentListCache, DisallowedFragmentListCache>();
+            services.AddSingleton<ICharacterSetRepositoryFactory, DICharacterSetRepositoryFactory>();
+            services.AddSingleton<IDisallowedFragmentRepositoryFactory, DIDisallowedFragmentRepositoryFactory>();
             services.AddTransient<CharacterSetValidator>();
 
             return services;

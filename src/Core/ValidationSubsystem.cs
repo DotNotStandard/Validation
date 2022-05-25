@@ -19,17 +19,15 @@ namespace DotNotStandard.Validation.Core
 	/// </summary>
 	public class ValidationSubsystem
 	{
-		private readonly IServiceProvider _serviceProvider;
 		private readonly ICharacterSetListCache _characterSetListCache;
 		private readonly IDisallowedFragmentListCache _disallowedFragmentListCache;
 
         #region Constructors
 
-        public ValidationSubsystem(IServiceProvider serviceProvider)
+        public ValidationSubsystem(ICharacterSetListCache characterSetListCache, IDisallowedFragmentListCache disallowedFragmentListCache)
         {
-			_serviceProvider = serviceProvider;
-			_characterSetListCache = serviceProvider.GetRequiredService<ICharacterSetListCache>();
-			_disallowedFragmentListCache = serviceProvider.GetRequiredService<IDisallowedFragmentListCache>();
+			_characterSetListCache = characterSetListCache;
+			_disallowedFragmentListCache = disallowedFragmentListCache;
 		}
 
 		#endregion
@@ -121,16 +119,18 @@ namespace DotNotStandard.Validation.Core
 			bool isInitialised;
 			DateTime startedAt;
 			TimeSpan remainingTimeout;
+			ICharacterSetListCacheInitialiser cscacheInitialiser;
+			IDisallowedFragmentListCacheInitialiser dfcacheInitialiser;
 
-			if (!(_characterSetListCache is ICharacterSetListCacheInitialiser cscacheInitialiser)) return false;
-			if (!(_disallowedFragmentListCache is IDisallowedFragmentListCacheInitialiser dfcacheInitialiser)) return false;
+			cscacheInitialiser = _characterSetListCache as ICharacterSetListCacheInitialiser;
+			dfcacheInitialiser = _disallowedFragmentListCache as IDisallowedFragmentListCacheInitialiser;
 
 			startedAt = DateTime.Now;
-			isInitialised = cscacheInitialiser.TryCompleteInitialisation(timeout);
+			isInitialised = cscacheInitialiser?.TryCompleteInitialisation(timeout) ?? true;
 			if (isInitialised)
             {
 				remainingTimeout = DateTime.Now - startedAt;
-				isInitialised = dfcacheInitialiser.TryCompleteInitialisation(remainingTimeout);
+				isInitialised = dfcacheInitialiser?.TryCompleteInitialisation(remainingTimeout) ?? true;
 			}
 
 			return isInitialised;

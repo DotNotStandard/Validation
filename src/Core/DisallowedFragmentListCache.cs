@@ -16,16 +16,22 @@ using System.Threading.Tasks;
 
 namespace DotNotStandard.Validation.Core
 {
+    /// <summary>
+    /// A cache of disallowed fragments. Makes use of the auto refreshing cache from
+    /// the DotNotStandard.Caching package to ensure that up to date data is provided.
+    /// </summary>
     internal class DisallowedFragmentListCache : IDisallowedFragmentListCache, IDisallowedFragmentListCacheInitialiser
     {
         private AutoRefreshingItemCache<DisallowedFragmentList> _cache;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
+        private readonly IDisallowedFragmentRepositoryFactory _repositoryFactory;
 
         #region Constructors
 
-        public DisallowedFragmentListCache(ILogger<DisallowedFragmentListCache> logger, IServiceProvider serviceProvider)
+        public DisallowedFragmentListCache(ILogger<DisallowedFragmentListCache> logger, IDisallowedFragmentRepositoryFactory repositoryFactory)
         {
-            _serviceProvider = serviceProvider;
+            _logger = logger;
+            _repositoryFactory = repositoryFactory;
             _cache = new AutoRefreshingItemCache<DisallowedFragmentList>(
                 logger,
                 GetListToCacheAsync,
@@ -111,10 +117,45 @@ namespace DotNotStandard.Validation.Core
             IDisallowedFragmentRepository repository;
             DisallowedFragmentList list;
 
-            list = new DisallowedFragmentList();
-            repository = _serviceProvider.GetRequiredService<IDisallowedFragmentRepository>();
-            await list.LoadListAsync(repository);
-            return list;
+            try
+            {
+                list = new DisallowedFragmentList();
+                repository = _repositoryFactory.CreateDisallowedFragmentRepository();
+                try
+                {
+                    await list.LoadListAsync(repository);
+                }
+                finally
+                {
+                    await DisposeRepositoryAsync(repository);
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception during list retrieval");
+                throw;
+            }
+
+        }
+
+        /// <summary>
+        /// Attempt to clean up any resources used by the repository
+        /// </summary>
+        /// <param name="repository">The repository instance that we created</param>
+        private async Task DisposeRepositoryAsync(IDisallowedFragmentRepository repository)
+        {
+            if (repository is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+                return;
+            }
+            if (repository is IDisposable disposable)
+            {
+                disposable.Dispose();
+                return;
+            }
         }
 
         #endregion

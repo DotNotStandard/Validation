@@ -19,6 +19,9 @@ using DotNotStandard.Validation.Core.DataAccess;
 namespace DotNotStandard.Validation.Core
 {
 
+	/// <summary>
+	/// The list of fragments that are to be disallowed
+	/// </summary>
 	[Serializable]
 	public class DisallowedFragmentList : ICloneable
 	{

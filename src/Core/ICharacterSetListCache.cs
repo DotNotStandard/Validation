@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace DotNotStandard.Validation.Core
 {
+
+    /// <summary>
+    /// The contract that a character set list cache is required to fulfil
+    /// </summary>
     public interface ICharacterSetListCache
     {
         CharacterSetList GetCharacterSetList();

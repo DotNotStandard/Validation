@@ -12,6 +12,9 @@ using System.Text;
 namespace DotNotStandard.Validation.Core
 {
 
+	/// <summary>
+	/// DataAnnotations attribute used to apply character set requirements to string values
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 	public sealed class CharacterSetAttribute : ValidationAttribute
 	{
@@ -31,6 +34,13 @@ namespace DotNotStandard.Validation.Core
 
         public override bool RequiresValidationContext => true;
 
+		/// <summary>
+		/// Apply the validation rule defined in the attribute
+		/// </summary>
+		/// <param name="value">The value to be validated</param>
+		/// <param name="validationContext">The validation context within which we are operating</param>
+		/// <returns>ValidationResult indicating the outcome of the operation</returns>
+		/// <exception cref="ArgumentNullException">ValidationContext parameter has not been provided</exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
 		{
 			CharacterSetValidator validator;

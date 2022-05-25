@@ -18,6 +18,9 @@ using DotNotStandard.Validation.Core.DataAccess;
 namespace DotNotStandard.Validation.Core
 {
 
+	/// <summary>
+	/// The list of character sets supported by the subsystem
+	/// </summary>
 	[Serializable]
 	public class CharacterSetList : ICloneable
 	{

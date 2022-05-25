@@ -8,6 +8,11 @@ using System;
 
 namespace DotNotStandard.Validation.Core
 {
+    /// <summary>
+    /// The contract that a character set list cache is required to fulfil in order
+    /// to correctly support initialisation. Separated from the main contract so that 
+    /// the members are less visible and distracting
+    /// </summary>
     public interface ICharacterSetListCacheInitialiser
     {
         void Initialise();
